@@ -46,15 +46,14 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "devDependencies": {
-    "@types/express": "^5.0.1",
-    "@types/node": "^22.10.0",
-    "typescript": "^5.7.2"
-  },
+  "devDependencies": {},
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.4.0",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.10.0",
     "agents": "^0.0.101",
     "express": "^4.18.2",
+    "typescript": "^5.7.2",
     "wrangler": "^4.24.0",
     "zod": "^3.25.67"
   }
