@@ -10,6 +10,8 @@ import { DomainAnalyticsApiModule } from '../modules/domain-analytics/domain-ana
 import { BaseModule } from '../modules/base.module.js';
 import { EnabledModules, isModuleEnabled } from '../config/modules.config.js';
 import { ContentAnalysisApiModule } from '../modules/content-analysis/content-analysis-api.module.js';
+import { AppDataApiModule } from '../modules/app-data/app-data-api.module.js';
+import { MerchantApiModule } from '../modules/merchant/merchant-api.module.js';
 
 export class ModuleLoaderService {
   static loadModules(dataForSEOClient: DataForSEOClient, enabledModules: EnabledModules): BaseModule[] {
@@ -41,6 +43,12 @@ export class ModuleLoaderService {
     }
     if(isModuleEnabled('CONTENT_ANALYSIS', enabledModules)) {
       modules.push(new ContentAnalysisApiModule(dataForSEOClient));
+    }
+    if (isModuleEnabled('APP_DATA', enabledModules)) {
+      modules.push(new AppDataApiModule(dataForSEOClient));
+    }
+    if (isModuleEnabled('MERCHANT', enabledModules)) {
+      modules.push(new MerchantApiModule(dataForSEOClient));
     }
 
     return modules;
