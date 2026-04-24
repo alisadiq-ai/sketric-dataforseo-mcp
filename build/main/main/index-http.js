@@ -1,0 +1,124 @@
+#!/usr/bin/env node
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import express from "express";
+import { randomUUID } from "node:crypto";
+import { name, version } from '../core/utils/version.js';
+import { initializeFieldConfiguration } from '../core/config/field-configuration.js';
+import { initMcpServer } from "./init-mcp-server.js";
+// Initialize field configuration if provided
+initializeFieldConfiguration();
+console.error('Starting DataForSEO MCP Server...');
+console.error(`Server name: ${name}, version: ${version}`);
+function getSessionId() {
+    return randomUUID().toString();
+}
+async function main() {
+    const app = express();
+    app.use(express.json());
+    // Basic Auth Middleware
+    const basicAuth = (req, res, next) => {
+        if (req.body?.method === 'tools/list') {
+            next();
+            return;
+        }
+        const authHeader = req.headers.authorization;
+        const envUsername = process.env.DATAFORSEO_USERNAME;
+        const envPassword = process.env.DATAFORSEO_PASSWORD;
+        let username;
+        let password;
+        // Try to extract credentials from Authorization header
+        if (authHeader?.startsWith('Basic ')) {
+            try {
+                const base64Credentials = authHeader.slice(6);
+                const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
+                [username, password] = credentials.split(':');
+            }
+            catch (error) {
+                console.error('Invalid Basic auth header:', error);
+            }
+        }
+        // Fall back to environment variables if no header credentials provided
+        if (!username || !password) {
+            username = envUsername;
+            password = envPassword;
+        }
+        // Validate credentials
+        if (!username || !password) {
+            console.error('Invalid credentials');
+            res.status(401).json({
+                jsonrpc: "2.0",
+                error: {
+                    code: -32001,
+                    message: "Invalid credentials"
+                },
+                id: null
+            });
+            return;
+        }
+        req.username = username;
+        req.password = password;
+        next();
+    };
+    const handleMcpRequest = async (req, res) => {
+        // In stateless mode, create a new instance of transport and server for each request
+        // to ensure complete isolation. A single instance would cause request ID collisions
+        // when multiple clients connect concurrently.
+        try {
+            const server = initMcpServer(req.username, req.password);
+            console.error(Date.now().toLocaleString());
+            const transport = new StreamableHTTPServerTransport({
+                sessionIdGenerator: undefined
+            });
+            await server.connect(transport);
+            console.error('handle request');
+            await transport.handleRequest(req, res, req.body);
+            console.error('end handle request');
+            req.on('close', () => {
+                console.error('Request closed');
+                transport.close();
+                server.close();
+            });
+        }
+        catch (error) {
+            console.error('Error handling MCP request:', error);
+            if (!res.headersSent) {
+                res.status(500).json({
+                    jsonrpc: '2.0',
+                    error: {
+                        code: -32603,
+                        message: 'Internal server error',
+                    },
+                    id: null,
+                });
+            }
+        }
+    };
+    const handleNotAllowed = (method) => async (req, res) => {
+        console.error(`Received ${method} request`);
+        res.status(405).json({
+            jsonrpc: "2.0",
+            error: {
+                code: -32000,
+                message: "Method not allowed."
+            },
+            id: null
+        });
+    };
+    // Apply basic auth and shared handler to both endpoints
+    app.post('/http', basicAuth, handleMcpRequest);
+    app.post('/mcp', basicAuth, handleMcpRequest);
+    app.get('/http', handleNotAllowed('GET HTTP'));
+    app.get('/mcp', handleNotAllowed('GET MCP'));
+    app.delete('/http', handleNotAllowed('DELETE HTTP'));
+    app.delete('/mcp', handleNotAllowed('DELETE MCP'));
+    // Start the server
+    const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+    app.listen(PORT, () => {
+        console.log(`MCP Stateless Streamable HTTP Server listening on port ${PORT}`);
+    });
+}
+main().catch((error) => {
+    console.error("Fatal error in main():", error);
+    process.exit(1);
+});
+//# sourceMappingURL=index-http.js.map
