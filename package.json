@@ -1,7 +1,7 @@
 {
   "name": "@sketric/dataforseo-mcp-server",
-  "version": "2.9.0-sketric.1",
-  "description": "Sketric fork of the DataForSEO MCP server. Adds APP_DATA (App Store + Google Play) and MERCHANT (Amazon + Google Shopping) modules on top of upstream v2.8.x.",
+  "version": "2.9.0-sketric.2",
+  "description": "A Model Context Protocol (MCP) server for the DataForSEO API, enabling modular and extensible integration of DataForSEO endpoints with support for both HTTP and SSE transports.",
   "main": "build/main/main/index.js",
   "type": "module",
   "bin": {
@@ -36,7 +36,6 @@
   ],
   "author": "dataforseo",
   "license": "Apache-2.0",
-  "description": "A Model Context Protocol (MCP) server for the DataForSEO API, enabling modular and extensible integration of DataForSEO endpoints with support for both HTTP and SSE transports.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dataforseo/mcp-server-typescript.git"

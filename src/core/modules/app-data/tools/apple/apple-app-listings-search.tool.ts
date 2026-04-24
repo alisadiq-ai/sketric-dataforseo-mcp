@@ -22,8 +22,7 @@ export class AppDataAppleAppListingsSearchTool extends BaseTool {
       categories: z.array(z.string()).max(10).optional().describe('Apple App Store category codes (max 10). Get codes via app_data_apple_categories'),
       limit: z.number().min(1).max(1000).default(100).optional().describe('max apps returned (default 100)'),
       offset: z.number().min(0).optional().describe('offset in results (default 0)'),
-      filters: this.getFilterExpression().optional().describe('filter expressions (max 8). Example: ["rating.value",">",4]'),
-      order_by: z.array(z.string()).max(3).optional().describe('sort rules, e.g. ["rating.value,desc"]'),
+      filters: this.getFilterExpression().optional().describe('filter expressions (max 8). Example: ["rating.value",">",4]. Use filters instead of sorting — this endpoint does not accept order_by.'),
     };
   }
 
@@ -36,7 +35,6 @@ export class AppDataAppleAppListingsSearchTool extends BaseTool {
         limit: params.limit,
         offset: params.offset,
         filters: this.formatFilters(params.filters),
-        order_by: this.formatOrderBy(params.order_by),
       }]);
       return this.validateAndFormatResponse(response);
     } catch (error) {
