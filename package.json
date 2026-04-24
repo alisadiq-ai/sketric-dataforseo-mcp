@@ -1,6 +1,6 @@
 {
   "name": "@sketric/dataforseo-mcp-server",
-  "version": "2.9.0-sketric.2",
+  "version": "2.9.0-sketric.3",
   "description": "A Model Context Protocol (MCP) server for the DataForSEO API, enabling modular and extensible integration of DataForSEO endpoints with support for both HTTP and SSE transports.",
   "main": "build/main/main/index.js",
   "type": "module",

@@ -17,7 +17,8 @@ export class AppDataGoogleAppListingsSearchTool extends BaseTool {
             categories: z.array(z.string()).max(10).optional().describe('Google Play category codes to filter by (max 10). Get codes via app_data_google_categories'),
             limit: z.number().min(1).max(1000).default(100).optional().describe('max apps returned (default 100)'),
             offset: z.number().min(0).optional().describe('offset in the results array (default 0)'),
-            filters: this.getFilterExpression().optional().describe('array of filter expressions (max 8). Example: ["rating.value",">",4]. Use filters instead of sorting — this endpoint does not accept order_by.'),
+            location_code: z.number().optional().describe('location code (default 2840 = US). Get codes via app_data_google_locations'),
+            language_code: z.string().optional().describe('language code (default "en")'),
         };
     }
     async handle(params) {
@@ -28,7 +29,8 @@ export class AppDataGoogleAppListingsSearchTool extends BaseTool {
                     categories: params.categories,
                     limit: params.limit,
                     offset: params.offset,
-                    filters: this.formatFilters(params.filters),
+                    location_code: params.location_code,
+                    language_code: params.language_code,
                 }]);
             return this.validateAndFormatResponse(response);
         }
